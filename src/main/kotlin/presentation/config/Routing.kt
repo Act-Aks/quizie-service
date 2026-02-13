@@ -1,9 +1,5 @@
 package com.actaks.presentation.config
 
-import com.actaks.data.database.DatabaseFactory
-import com.actaks.data.repository.IssueReportRepositoryImpl
-import com.actaks.data.repository.QuizQuestionRepositoryImpl
-import com.actaks.data.repository.QuizTopicRepositoryImpl
 import com.actaks.domain.repository.IssueReportRepository
 import com.actaks.domain.repository.QuizQuestionRepository
 import com.actaks.domain.repository.QuizTopicRepository
@@ -23,14 +19,14 @@ import io.ktor.server.application.*
 import io.ktor.server.http.content.*
 import io.ktor.server.resources.*
 import io.ktor.server.routing.*
+import org.koin.ktor.ext.inject
 
 fun Application.configureRouting() {
     install(Resources)
 
-    val database = DatabaseFactory.create()
-    val quizQuestionRepository: QuizQuestionRepository = QuizQuestionRepositoryImpl(database)
-    val quizTopicRepository: QuizTopicRepository = QuizTopicRepositoryImpl(database)
-    val issueReportRepository: IssueReportRepository = IssueReportRepositoryImpl(database)
+    val quizQuestionRepository: QuizQuestionRepository by inject()
+    val quizTopicRepository: QuizTopicRepository by inject()
+    val issueReportRepository: IssueReportRepository by inject()
 
     routing {
         root()
