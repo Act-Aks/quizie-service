@@ -9,5 +9,5 @@ data class IssueReport(
     val issueType: String,
     val comment: String? = null,
     val userEmail: String? = null,
-    val createdAt: String,
+    val timestamp: String,
 )

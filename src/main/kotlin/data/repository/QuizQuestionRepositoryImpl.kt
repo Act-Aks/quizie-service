@@ -3,7 +3,7 @@ package com.actaks.data.repository
 import com.actaks.data.database.entity.QuizQuestionEntity
 import com.actaks.data.mapper.toQuizQuestion
 import com.actaks.data.mapper.toQuizQuestionEntity
-import com.actaks.data.util.Constant
+import com.actaks.data.util.Constant.QUESTIONS_COLLECTION_NAME
 import com.actaks.domain.model.QuizQuestion
 import com.actaks.domain.repository.QuizQuestionRepository
 import com.actaks.domain.util.DataError
@@ -15,19 +15,21 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
+import org.bson.types.ObjectId
 
 class QuizQuestionRepositoryImpl(
     database: MongoDatabase
 ) : QuizQuestionRepository {
 
-    private val questionCollection = database.getCollection<QuizQuestionEntity>(Constant.QUESTIONS_COLLECTION_NAME)
+    private val questionCollection = database
+        .getCollection<QuizQuestionEntity>(QUESTIONS_COLLECTION_NAME)
 
     override suspend fun upsertQuestion(question: QuizQuestion): Result<Unit, DataError> {
         return try {
             if (question.id == null) {
                 questionCollection.insertOne(question.toQuizQuestionEntity())
             } else {
-                val filterQuery = Filters.eq(QuizQuestionEntity::_id.name, question.id)
+                val filterQuery = Filters.eq(QuizQuestionEntity::_id.name, ObjectId(question.id))
                 val updateQuery =
                     Updates.combine(
                         Updates.set(QuizQuestionEntity::question.name, question.question),
@@ -79,8 +81,7 @@ class QuizQuestionRepositoryImpl(
             return Result.Failure(DataError.Validation)
         }
         return try {
-
-            val filterQuery = Filters.eq(QuizQuestionEntity::_id.name, id)
+            val filterQuery = Filters.eq(QuizQuestionEntity::_id.name, ObjectId(id))
             val questionEntity = questionCollection.find(filter = filterQuery).firstOrNull()
 
             if (questionEntity != null) {
@@ -99,7 +100,7 @@ class QuizQuestionRepositoryImpl(
             return Result.Failure(DataError.Validation)
         }
         return try {
-            val filterQuery = Filters.eq(QuizQuestionEntity::_id.name, id)
+            val filterQuery = Filters.eq(QuizQuestionEntity::_id.name, ObjectId(id))
             val deleteResult = questionCollection.deleteOne(filter = filterQuery)
 
             if (deleteResult.deletedCount > 0) {

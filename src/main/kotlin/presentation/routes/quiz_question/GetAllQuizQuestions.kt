@@ -5,17 +5,16 @@ import com.actaks.domain.util.onFailure
 import com.actaks.domain.util.onSuccess
 import com.actaks.presentation.util.respondWithError
 import io.ktor.http.*
+import io.ktor.server.resources.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
 fun Route.getAllQuizQuestions(
     repository: QuizQuestionRepository
 ) {
-    get("/quiz/questions") {
-        val topicCode = call.queryParameters["topicCode"]?.toIntOrNull()
-        val limit = call.queryParameters["limit"]?.toIntOrNull()
+    get<QuizQuestionRoutesPath> { path ->
         repository
-            .getAllQuestions(topicCode, limit)
+            .getAllQuestions(path.topicCode, path.limit)
             .onSuccess { questions ->
                 call.respond(
                     message = questions,

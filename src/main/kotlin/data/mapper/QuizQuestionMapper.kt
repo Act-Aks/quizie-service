@@ -4,7 +4,7 @@ import com.actaks.data.database.entity.QuizQuestionEntity
 import com.actaks.domain.model.QuizQuestion
 
 fun QuizQuestionEntity.toQuizQuestion() = QuizQuestion(
-    id = _id.toString(),
+    id = _id,
     question = question,
     rightAnswer = rightAnswer,
     wrongAnswers = wrongAnswers,
