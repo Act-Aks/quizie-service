@@ -8,13 +8,14 @@ import com.actaks.domain.model.QuizQuestion
 import com.actaks.domain.repository.QuizQuestionRepository
 import com.actaks.domain.util.DataError
 import com.actaks.domain.util.Result
+import com.mongodb.client.model.Aggregates
 import com.mongodb.client.model.Filters
 import com.mongodb.client.model.Updates
 import com.mongodb.kotlin.client.coroutine.MongoDatabase
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
+import org.bson.conversions.Bson
 import org.bson.types.ObjectId
 
 class QuizQuestionRepositoryImpl(
@@ -50,18 +51,46 @@ class QuizQuestionRepositoryImpl(
         }
     }
 
-    override suspend fun getAllQuestions(
-        topicCode: Int?,
-        limit: Int?
-    ): Result<List<QuizQuestion>, DataError> {
+    override suspend fun getAllQuestions(topicCode: Int?): Result<List<QuizQuestion>, DataError> {
         return try {
-            val questionsLimit = limit?.takeIf { it > 0 } ?: 10
             val filterQuery = topicCode?.let { Filters.eq(QuizQuestionEntity::topicCode.name, it) }
                 ?: Filters.empty()
 
             val questions = questionCollection
                 .find(filter = filterQuery)
-                .take(questionsLimit)
+                .map { it.toQuizQuestion() }
+                .toList()
+
+            if (questions.isNotEmpty()) {
+                Result.Success(questions)
+            } else {
+                Result.Failure(DataError.NotFound)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Result.Failure(DataError.Database)
+        }
+    }
+
+    override suspend fun getRandomQuestions(
+        topicCode: Int?,
+        limit: Int?
+    ): Result<List<QuizQuestion>, DataError> {
+        return try {
+            val questionsLimit = limit?.takeIf { it > 0 } ?: 10
+            val matchStage = if (topicCode == null || topicCode == 0) {
+                emptyList<Bson>()
+            } else {
+                listOf(
+                    Aggregates.match(
+                        Filters.eq(QuizQuestionEntity::topicCode.name, topicCode)
+                    )
+                )
+            }
+            val pipeline = matchStage + Aggregates.sample(questionsLimit)
+
+            val questions = questionCollection
+                .aggregate(pipeline)
                 .map { it.toQuizQuestion() }
                 .toList()
 
@@ -108,6 +137,17 @@ class QuizQuestionRepositoryImpl(
             } else {
                 Result.Failure(DataError.NotFound)
             }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Result.Failure(DataError.Database)
+        }
+    }
+
+    override suspend fun insertQuestionsInBulk(questions: List<QuizQuestion>): Result<Unit, DataError> {
+        return try {
+            questionCollection
+                .insertMany(questions.map { it.toQuizQuestionEntity() })
+            Result.Success(Unit)
         } catch (e: Exception) {
             e.printStackTrace()
             Result.Failure(DataError.Database)

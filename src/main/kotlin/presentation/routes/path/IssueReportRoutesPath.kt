@@ -1,4 +1,4 @@
-package com.actaks.presentation.routes.issue_report
+package com.actaks.presentation.routes.path
 
 import io.ktor.resources.*
 

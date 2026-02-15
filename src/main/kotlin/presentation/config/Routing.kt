@@ -3,17 +3,9 @@ package com.actaks.presentation.config
 import com.actaks.domain.repository.IssueReportRepository
 import com.actaks.domain.repository.QuizQuestionRepository
 import com.actaks.domain.repository.QuizTopicRepository
-import com.actaks.presentation.routes.issue_report.deleteIssueReportById
-import com.actaks.presentation.routes.issue_report.getAllIssueReports
-import com.actaks.presentation.routes.issue_report.insertIssueReport
-import com.actaks.presentation.routes.quiz_question.deleteQuizQuestionById
-import com.actaks.presentation.routes.quiz_question.getAllQuizQuestions
-import com.actaks.presentation.routes.quiz_question.getQuizQuestionById
-import com.actaks.presentation.routes.quiz_question.upsertQuizQuestion
-import com.actaks.presentation.routes.quiz_topic.deleteQuizTopicById
-import com.actaks.presentation.routes.quiz_topic.getAllQuizTopics
-import com.actaks.presentation.routes.quiz_topic.getQuizTopicById
-import com.actaks.presentation.routes.quiz_topic.upsertQuizTopic
+import com.actaks.presentation.routes.issueReportRoutes
+import com.actaks.presentation.routes.quizQuestionRoutes
+import com.actaks.presentation.routes.quizTopicRoutes
 import com.actaks.presentation.routes.root
 import io.ktor.server.application.*
 import io.ktor.server.http.content.*
@@ -30,23 +22,9 @@ fun Application.configureRouting() {
 
     routing {
         root()
-
-        /* Quiz questions routes */
-        getAllQuizQuestions(quizQuestionRepository)
-        getQuizQuestionById(quizQuestionRepository)
-        deleteQuizQuestionById(quizQuestionRepository)
-        upsertQuizQuestion(quizQuestionRepository)
-
-        /* Quiz topics routes */
-        getAllQuizTopics(quizTopicRepository)
-        getQuizTopicById(quizTopicRepository)
-        deleteQuizTopicById(quizTopicRepository)
-        upsertQuizTopic(quizTopicRepository)
-
-        /* Issue reports routes */
-        getAllIssueReports(issueReportRepository)
-        deleteIssueReportById(issueReportRepository)
-        insertIssueReport(issueReportRepository)
+        quizQuestionRoutes(quizQuestionRepository)
+        quizTopicRoutes(quizTopicRepository)
+        issueReportRoutes(issueReportRepository)
 
         /* Static images routes */
         staticResources(

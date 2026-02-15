@@ -1,4 +1,4 @@
-package com.actaks.presentation.routes.quiz_topic
+package com.actaks.presentation.routes.path
 
 import io.ktor.resources.*
 

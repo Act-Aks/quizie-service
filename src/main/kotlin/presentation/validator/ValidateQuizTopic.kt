@@ -14,7 +14,7 @@ fun RequestValidationConfig.validateQuizTopic() {
                 reason = "Image url must not be empty"
             )
 
-            quizTopic.code <= 0 -> ValidationResult.Invalid(
+            quizTopic.code < 0 -> ValidationResult.Invalid(
                 reason = "Topic code must be a positive integer"
             )
 
